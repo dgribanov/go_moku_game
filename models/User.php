@@ -9,8 +9,6 @@ use yii\web\IdentityInterface;
 
 class User extends ActiveRecord implements IdentityInterface
 {
-    //public $language = 'en-US';
-
     public static function tableName()
     {
         return 'users';

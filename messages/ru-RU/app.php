@@ -62,7 +62,7 @@ return [
     'Wait for answer' => 'Ожидайте ответа',
     'Winner' => 'Победитель',
     'Yes' => 'Принять',
-    'You win {winner_name} ! Yor rating +1 !' => 'Вы выиграли {winner_name} ! Ваш рейтинг +1 !',
+    'You is winner, {winner_name} ! Your rating +1 !' => 'Вы выиграли {winner_name} ! Ваш рейтинг +1 !',
     'Your active games:' => 'Ваши активные игры:',
     'Your invitations:' => 'Ваши приглашения:',
     'Your previous games:' => 'Ваши предыдущие игры:',

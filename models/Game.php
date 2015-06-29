@@ -73,7 +73,7 @@ class Game extends ActiveRecord
         return $games;
     }
 
-    public function findWinner($id)
+    public static function findWinner($id)
     {
         $result = '';
         $winner_name = Game::findBySql('
@@ -108,7 +108,7 @@ class Game extends ActiveRecord
         )->asArray()->one();
 
         if(!empty($winner_name)){
-            $result = Yii::t('app', 'You win {winner_name} ! Yor rating +1 !',
+            $result = Yii::t('app', 'You is winner, {winner_name} ! Your rating +1 !',
                 ['winner_name' => $winner_name['winner_name']]);
         }
 
