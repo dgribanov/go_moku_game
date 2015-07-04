@@ -6,9 +6,9 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
+//use app\models\LoginForm;
 use app\models\ContactForm;
-use app\models\User;
+use app\models\UserInfo;
 use app\models\Message;
 use app\models\Game;
 use app\models\Move;
@@ -59,10 +59,13 @@ class SiteController extends Controller
         if (!parent::beforeAction($action)) {
             return false;
         }
-        if (Yii::$app->user->isGuest) {
+        /*if (Yii::$app->user->isGuest) {
             Yii::$app->language = 'en-US';
         } else {
             Yii::$app->language = Yii::$app->user->identity->language;
+        }*/
+        if (!Yii::$app->user->isGuest) {
+            Yii::$app->language = UserInfo::getUserLanguage(Yii::$app->user->id);
         }
 
         return true;
@@ -70,7 +73,7 @@ class SiteController extends Controller
 
     public function actionChangeLanguage($lang)
     {
-        $user = User::findOne(Yii::$app->user->id);
+        $user = UserInfo::findOne(Yii::$app->user->id);
         $user->language = $lang;
         if($user->validate()){
             $user->save();
@@ -82,45 +85,48 @@ class SiteController extends Controller
     public function actionIndex()
     {
         if (Yii::$app->user->isGuest) {
-            return $this->redirect(Url::to(['site/login-form']));
+            //return $this->redirect(Url::to(['site/login-form']));
+            return $this->redirect(Url::to(['/user/security/login']));
         }
 
+        $userId = Yii::$app->user->id;
+
         $availableUsers = new ActiveDataProvider([
-            'query' => User::findAvailableUsers(),
+            'query' => UserInfo::findAvailableUsers($userId),
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
         $messagesFrom = new ActiveDataProvider([
-            'query' => Message::findMessagesFrom(),
+            'query' => Message::findMessagesFrom($userId),
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
         $messagesTo = new ActiveDataProvider([
-            'query' => Message::findMessagesTo(),
+            'query' => Message::findMessagesTo($userId),
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
         $activeGames = new ActiveDataProvider([
-            'query' => Game::findActiveGames(),
+            'query' => Game::findActiveGames($userId),
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
         $previousGames = new ActiveDataProvider([
-            'query' => Game::findPreviousGames(),
+            'query' => Game::findPreviousGames($userId),
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
-        $rating = Yii::$app->user->identity->rating;
+        $rating = UserInfo::getUserRating($userId);
 
         return $this->render('index', [
             'availableUsers' => $availableUsers,
@@ -132,7 +138,7 @@ class SiteController extends Controller
         ]);
     }
 
-    public function actionLoginForm()
+    /*public function actionLoginForm()
     {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
@@ -175,19 +181,12 @@ class SiteController extends Controller
     {
         Yii::$app->user->logout();
         return $this->redirect(Url::to(['site/login-form']));
-    }
+    }*/
 
     public function actionInvite($id)
     {
         $userId = Yii::$app->user->id;
-        $message = Message::find()
-            ->where([
-                'from' => $userId,
-                'to' => $id,
-                'answer' => false,
-                'active' => true
-            ])
-            ->one();
+        $message = Message::findMessage($userId, $id);
 
         if(!$message){
             $message = new Message();
@@ -254,8 +253,8 @@ class SiteController extends Controller
     {
         $game = Game::find()->where(['game_id' => $id])->asArray()->one();
         $moves = Move::find()
-            ->select('*, users.username')
-            ->innerJoin('users', 'users.id = moves.gamer_id')
+            ->select('*, user.username')
+            ->innerJoin('user', 'user.id = moves.gamer_id')
             ->where(['game_id' => $id])
             ->orderBy('move_id')
             ->asArray()->all();
@@ -338,7 +337,7 @@ class SiteController extends Controller
                 $game->save();
             }
 
-            $user = User::findOne($game->winner);
+            $user = UserInfo::findOne($game->winner);
             $user->rating += 1;
             if ($user->validate()) {
                 $user->save();

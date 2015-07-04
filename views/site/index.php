@@ -22,7 +22,7 @@ $this->title = 'GameCenter';
         'rating',
         ['class' => 'yii\grid\ActionColumn',
             'buttons' => [
-                'invite' => function ($url,$model,$key) { return Html::a(\Yii::t('app', 'Invite this user'), Url::to(['site/invite', 'id' => $model->id]));},
+                'invite' => function ($url,$model,$key) { return Html::a(\Yii::t('app', 'Invite this user'), Url::to(['site/invite', 'id' => $model->user_id]));},
             ],
             'header' => \Yii::t('app', 'Action'),
             'template' => '<div>{invite}</div>',

@@ -36,21 +36,19 @@ AppAsset::register($this);
                 'options' => ['class' => 'navbar-nav navbar-right'],
                 'items' => array_merge([
                     ['label' => Yii::t('app', 'GameCenter'), 'url' => ['/site/index']],
-                    ['label' => Yii::t('app', 'About'), 'url' => ['/site/about']]
-                ], Yii::$app->user->isGuest ?
-                        [
-                            ['label' => Yii::t('app', 'Login'), 'url' => ['/site/login-form']]
-                        ]
-                    :
-                        [
-                            ['label' => Yii::t('app', 'Logout ({username})',
-                            ['username' => Yii::$app->user->identity->username]),
-                            'url' => ['/site/logout'],
-                            'linkOptions' => ['data-method' => 'post']],
-                        ['label' => Yii::t('app', 'Eng'), 'url' => ['/site/change-language', 'lang' => 'en-US']],
-                        ['label' => Yii::t('app', 'Ру'), 'url' => ['/site/change-language', 'lang' => 'ru-RU']]
-                        ]
-                ),
+                    ['label' => Yii::t('app', 'About'), 'url' => ['/site/about']],
+                    ],
+                    Yii::$app->user->isGuest ?
+                        [['label' => 'Sign in', 'url' => ['/user/security/login']]] :
+                        [['label' => 'Sign out (' . Yii::$app->user->identity->username . ')',
+                            'url' => ['/user/security/logout'],
+                            'linkOptions' => ['data-method' => 'post']]],
+                    [['label' => 'Register', 'url' => ['/user/registration/register'], 'visible' => Yii::$app->user->isGuest]],
+                    !Yii::$app->user->isGuest ?
+                    [['label' => Yii::t('app', 'Eng'), 'url' => ['/site/change-language', 'lang' => 'en-US']],
+                    ['label' => Yii::t('app', 'Ру'), 'url' => ['/site/change-language', 'lang' => 'ru-RU']]] :
+                        []
+                )
             ]);
             NavBar::end();
         ?>

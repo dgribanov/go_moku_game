@@ -36,17 +36,17 @@ class Game extends ActiveRecord
     /**
      * Find all active games
      *
+     * @param string $userId
      * @return User $users
      */
-    public static function findActiveGames()
+    public static function findActiveGames($userId)
     {
-        $userId = Yii::$app->user->id;
         $games = Game::findBySql('
                 SELECT u1.username AS user1, u2.username AS user2, cur.username AS current_name, g.game_id, g.current
                 FROM `games` g
-                JOIN `users` u1 ON g.first_gamer_id = u1.id
-                JOIN `users` u2 ON g.second_gamer_id = u2.id
-                JOIN `users` cur ON g.current = cur.id
+                JOIN `user` u1 ON g.first_gamer_id = u1.id
+                JOIN `user` u2 ON g.second_gamer_id = u2.id
+                JOIN `user` cur ON g.current = cur.id
                 WHERE g.winner IS NULL AND :uid IN (g.first_gamer_id, g.second_gamer_id)',
             [':uid' => $userId]
         );
@@ -56,17 +56,17 @@ class Game extends ActiveRecord
     /**
      * Find all previous games
      *
+     * @param string $userId
      * @return User $users
      */
-    public static function findPreviousGames()
+    public static function findPreviousGames($userId)
     {
-        $userId = Yii::$app->user->id;
         $games = Game::findBySql('
                 SELECT u1.username AS user1, u2.username AS user2, uw.username AS winner_name, g.game_id
                 FROM `games` g
-                JOIN `users` u1 ON g.first_gamer_id = u1.id
-                JOIN `users` u2 ON g.second_gamer_id = u2.id
-                JOIN `users` uw ON g.winner = uw.id
+                JOIN `user` u1 ON g.first_gamer_id = u1.id
+                JOIN `user` u2 ON g.second_gamer_id = u2.id
+                JOIN `user` uw ON g.winner = uw.id
                 WHERE g.winner IS NOT NULL AND :uid IN (g.first_gamer_id, g.second_gamer_id)',
             [':uid' => $userId]
         );
@@ -79,7 +79,7 @@ class Game extends ActiveRecord
         $winner_name = Game::findBySql('
             SELECT u.username AS winner_name
             FROM `games` g
-            JOIN `users` u ON g.previous = u.id
+            JOIN `user` u ON g.previous = u.id
             WHERE g.game_id = :id AND EXISTS (
                 SELECT *
                 FROM `moves` m1

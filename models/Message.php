@@ -40,16 +40,16 @@ class Message extends ActiveRecord
     /**
      * Find all invited users
      *
-     * @return User $users
+     * @param string $userId
+     * @return Message $messages
      */
-    public static function findMessagesTo()
+    public static function findMessagesTo($userId)
     {
-        $userId = Yii::$app->user->id;
-        $messages = Message::findBySql('
-                SELECT users.username AS from_user, messages.message_id
-                FROM messages
-                JOIN users ON messages.from = users.id
-                WHERE messages.active > 0 AND messages.answer IS NULL AND messages.to = :uid',
+        $messages = self::findBySql('
+                SELECT u.username AS from_user, m.message_id
+                FROM `messages` m
+                JOIN `user` u ON m.from = u.id
+                WHERE m.active > 0 AND m.answer IS NULL AND m.to = :uid',
             [':uid' => $userId]
         );
         return $messages;
@@ -58,23 +58,44 @@ class Message extends ActiveRecord
     /**
      * Find all invited users
      *
-     * @return User $users
+     * @param string $userId
+     * @return Message $messages
      */
-    public static function findMessagesFrom()
+    public static function findMessagesFrom($userId)
     {
-        $userId = Yii::$app->user->id;
-        $messages = Message::findBySql('
-                SELECT users.username AS to_user, messages.message_id, messages.to,
+        $messages = self::findBySql('
+                SELECT u.username AS to_user, m.message_id, m.to,
                     CASE
-                        WHEN messages.answer IS NULL THEN "'. Yii::t('app', 'Not answered yet') . '"
-                        WHEN messages.answer = 0 THEN "' . Yii::t('app', 'Rejected') . '"
+                        WHEN m.answer IS NULL THEN "'. Yii::t('app', 'Not answered yet') . '"
+                        WHEN m.answer = 0 THEN "' . Yii::t('app', 'Rejected') . '"
                         ELSE "' . Yii::t('app', 'Confirmed') . '"
                     END user_answer
-                FROM messages
-                JOIN users ON messages.to = users.id
-                WHERE messages.active > 0 AND messages.from = :uid',
+                FROM `messages` m
+                JOIN `user` u ON m.to = u.id
+                WHERE m.active > 0 AND m.from = :uid',
             [':uid' => $userId]
         );
         return $messages;
+    }
+
+    /**
+     * Find message
+     *
+     * @param string $fromId
+     * @param string $toId
+     * @return Message $message
+     */
+    public static function findMessage($fromId, $toId)
+    {
+        $message = self::find()
+            ->where([
+                'from' => $fromId,
+                'to' => $toId,
+                'answer' => false,
+                'active' => true
+            ])
+            ->one();
+
+        return $message;
     }
 }
