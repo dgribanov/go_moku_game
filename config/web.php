@@ -6,6 +6,9 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'aliases' => [
+        '@data' => '@app/data',
+    ],
     'modules' => [
         'user' => [
             'class' => 'dektrium\user\Module',

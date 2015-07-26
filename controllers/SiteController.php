@@ -6,7 +6,6 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
-//use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\UserInfo;
 use app\models\Message;
@@ -85,7 +84,6 @@ class SiteController extends Controller
     public function actionIndex()
     {
         if (Yii::$app->user->isGuest) {
-            //return $this->redirect(Url::to(['site/login-form']));
             return $this->redirect(Url::to(['/user/security/login']));
         }
 
@@ -137,51 +135,6 @@ class SiteController extends Controller
             'rating' => $rating
         ]);
     }
-
-    /*public function actionLoginForm()
-    {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
-        }
-        $model = new LoginForm();
-        return $this->render('login', [
-            'model' => $model,
-        ]);
-    }
-
-    public function actionLogin()
-    {
-        $errors = [];
-        $model = new LoginForm();
-        $model->attributes = Yii::$app->request->post();
-        if ($model->validate()) {
-            $model->login();
-        } else {
-            $errors = $model->getErrors();
-        }
-
-        return Json::encode($errors);
-    }
-
-    public function actionRegister()
-    {
-        $errors = [];
-        $model = new LoginForm();
-        $model->attributes = Yii::$app->request->post();
-        if ($model->validate()) {
-            $model->signIn();
-        } else {
-            $errors = $model->getErrors();
-        }
-
-        return Json::encode($errors);
-    }
-
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
-        return $this->redirect(Url::to(['site/login-form']));
-    }*/
 
     public function actionInvite($id)
     {
@@ -315,8 +268,12 @@ class SiteController extends Controller
         }
 
         $result = $this->checkResult($game->game_id);
-        if(!empty($result)) $this->finishGame($game->game_id);
+        if(empty($result)) {
+            set_time_limit(0);
 
+        } else {
+            $this->finishGame($game->game_id);
+        }
 
         return Json::encode($result);
     }
